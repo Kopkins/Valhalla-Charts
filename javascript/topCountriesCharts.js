@@ -1,3 +1,6 @@
+/*
+ * prep the data for populating the country data charts
+ */
 function prepCountriesDataForCharts() {
   window.data = {labels: [], data: []};
   window.sortable = [];
@@ -10,6 +13,7 @@ function prepCountriesDataForCharts() {
     country.people_per_venue = (country.population > 0 && country.records.venue > 0) ? (country.population / country.records.venue) : 9999999;
     country.venue_per_person = (country.population > 0 && country.records.venue > 0) ? (country.records.venue / country.population) : 0;
 
+    // add data to the sortable so we can get it later
     if (country.address_per_person > 0.008) {
       sortable.push({label: country.name, value: country.address_per_person, country: country});
     }
@@ -20,53 +24,25 @@ function prepCountriesDataForCharts() {
   });
 }
 
-/**
- * Create the top countries chart
+/*
+ * prep the data for populating the road data charts
  */
-function populateTopCoverageChart() {
-  window.data.labels = sortable.map(function (item) {
-    return item.label;
-  });
-  window.data.addrData = sortable.map(function (item) {
-    return item.value;
+function prepRoadDataForCharts() {
+  window.rdata = {labels: [], data: []};
+  window.rsortable = [];
+  var countries = getAllRoadData();
+  Object.keys(countries).forEach(function (iso3) {
+    var country = countries[iso3];
+
+    rsortable.push({label: country.name, country: country});
+
   });
 
-  window.data.venueData = sortable.map(function (item) {
-    return item.country.venue_per_person;
-  });
-
-  var ctx = document.getElementById("top-countries").getContext('2d');
-  new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: data.labels,
-      datasets: [
-        {
-          label: 'venues/person',
-          data: window.data.venueData,
-          pointBackgroundColor: "#6ea0a4",
-          backgroundColor: 'rgba(110, 160, 164, 0.8)',
-          fill: true,
-          type: 'line'
-        },
-        {
-          label: 'addresses/person',
-          data: window.data.addrData,
-          backgroundColor: "#d4645c"
-        }
-      ]
-    },
-    options: {
-      scales: {
-        xAxes: [{
-          ticks: {
-            autoSkip: false
-          }
-        }]
-      }
-    }
+  rsortable.sort(function (a, b) {
+    return (a.country.records.total < b.country.records.total) ? 1 : -1;
   });
 }
+
 
 /**
  * Create the top countries by source chart
@@ -77,10 +53,6 @@ function populateTopBySourceChart() {
   });
   window.data.addrData = sortable.map(function (item) {
     return item.value;
-  });
-
-  window.data.venueData = sortable.map(function (item) {
-    return item.country.venue_per_person;
   });
 
   var sources = ['openaddresses', 'openstreetmap', 'whosonfirst', 'geonames'];
@@ -135,16 +107,24 @@ function populateTopBySourceChart() {
  * Populate the road data chart
 */
 function populateRoadDataChart() {
-  var sources = ['openaddresses', 'openstreetmap', 'whosonfirst', 'geonames'];
+    window.rdata.labels = rsortable.map(function (item) {
+    return item.label;
+  });
+
+  var sources = ['motorway', 'pmary', 'residential', 'secondary', 'serviceother', 'tertiary', 'trunk', 'unclassified'];
   var sources_colors = {
-    'openaddresses': '#d4645c',
-    'openstreetmap': '#6ea0a4',
-    'whosonfirst':   '#e6ead2',
-    'geonames':      '#d3c756'
+    'motorway':     '#d464fd',
+    'pmary':        '#6ea0a4',
+    'residential':  '#04ab76', 
+    'secondary':    '#e67722',
+    'serviceother': '#bc442a', 
+    'tertiary':     '#89364f', 
+    'trunk':        '#d3c756',
+    'unclassified': '#606060'
   };
 
   sources.forEach(function (source) {
-    data[source] = window.sortable.map(function (item) {
+    rdata[source] = window.rsortable.map(function (item) {
       return item.country.records[source] / item.country.records.total * 100;
     });
   });
@@ -152,7 +132,7 @@ function populateRoadDataChart() {
   sources.forEach(function (source) {
     datasets.push({
       label: source,
-      data: window.data[source],
+      data: window.rdata[source],
       backgroundColor: sources_colors[source]
     })
   });
@@ -177,7 +157,7 @@ function populateRoadDataChart() {
       }
     },
     data: {
-      labels: window.data.labels,
+      labels: window.rdata.labels,
       datasets: datasets
     }
   });

@@ -14,20 +14,16 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/1.2.0/list.min.js"></script>
     <script src="javascript/awesomplete.min.js" async></script>
     <script src="data/countries_data.js"></script>
+    <script src="data/road_data.js"></script>
     <script src="javascript/topCountriesCharts.js"></script>
-    <script src="javascript/countryDrillDown.js"></script>
-    <script src="javascript/detailsTable.js"></script>
 
     <div class="container">
         <div>
             <h1>Mapzen Valhalla </h1>
             <h2>Road Coverage by Type</h2><br/>
 
-            <h3>Records by Kyle</h3> </div> <br/>
+            <h3>Road by Class</h3> </div> <br/>
             <canvas id="road-class-by-country"></canvas>
-
-            <h3>Records By Source</h3> <br/>
-            <canvas id="top-countries-by-source"></canvas>
 
             <div class='text-center' style="padding-top: 40px; padding-bottom: 40px">
                 <img src='https://mapzen.com/common/styleguide/images/divider/compass-lg-blue.png'>
@@ -35,8 +31,10 @@
 
     <script src="https://mapzen.com/common/styleguide/scripts/mapzen-styleguide.min.js"></script>
     <script>
-        prepCountriesDataForCharts();
-        populateTopBySourceChart();
+        prepRoadDataForCharts();
+        populateRoadDataChart();
+        //prepCountriesDataForCharts();
+        //populateTopBySourceChart();
     </script>
 </body>
 </html>
