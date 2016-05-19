@@ -15,14 +15,17 @@
     <script src="javascript/awesomplete.min.js" async></script>
     <script src="data/countries_data.js"></script>
     <script src="data/road_data.js"></script>
-    <script src="javascript/topCountriesCharts.js"></script>
+    <script src="javascript/roadClassCharts.js"></script>
 
     <div class="container">
         <div>
             <h1>Mapzen Valhalla </h1>
-            <h2>Road Coverage by Type</h2><br/>
+            <h2>Road Coverage Types</h2><br/>
 
-            <h3>Road by Class</h3> </div> <br/>
+            <!-- h3>Percentage of Max Speed Tagged High-Class Roads</h3>
+            <canvas id="high-class-road-maxspeed"></canvas -->
+
+            <h3>Road Class per Country</h3> </div> <br/>
             <canvas id="road-class-by-country"></canvas>
 
             <div class='text-center' style="padding-top: 40px; padding-bottom: 40px">
@@ -33,8 +36,6 @@
     <script>
         prepRoadDataForCharts();
         populateRoadDataChart();
-        //prepCountriesDataForCharts();
-        //populateTopBySourceChart();
     </script>
 </body>
 </html>
