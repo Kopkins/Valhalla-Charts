@@ -27,14 +27,14 @@ function populateRoadDataChart() {
 
   var sources = ['motorway', 'trunk', 'pmary', 'secondary', 'tertiary', 'unclassified', 'residential',  'serviceother'];
   var sources_colors = {
-    'motorway':     '#d464fd',
+    'motorway':     '#ba1ab2',
     'pmary':        '#6ea0a4',
     'residential':  '#04ab76', 
     'secondary':    '#e67722',
     'serviceother': '#bc442a', 
-    'tertiary':     '#89364f', 
-    'trunk':        '#d3c756',
-    'unclassified': '#606060'
+    'tertiary':     '#910532', 
+    'trunk':        '#eae73f',
+    'unclassified': '#aebcff'
   };
 
   sources.forEach(function (source) {
