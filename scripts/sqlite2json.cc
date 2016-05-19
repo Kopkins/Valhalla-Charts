@@ -4,6 +4,7 @@
 #include <fstream>
 #include <sstream>
 #include <boost/format.hpp>
+#include <sqlite3.h>
 
 using std::string;
 using std::vector;
@@ -17,30 +18,70 @@ fillData (std::ifstream& in, vector<vector<float>>& data, vector<string>& countr
 void
 generateJson (vector<string>& countries, vector<vector<float>>& data, vector<string>& categories);
 
+static int
+callback (void *data, int argc, char **argv, char **azColName);
+
 int
 main (int argc, char** argv) {
   // If there is no input file print and error and exit
-  if (argc < 1) {
+  if (argc < 2) {
     std::cout << "ERROR: No input file specified." << std::endl;
-    std::cout << "Usage: ./sqlite2json input.txt" << std::endl;
-    exit(1);
+    std::cout << "Usage: ./sqlite2json statistics.sqlite" << std::endl;
+    exit(0);
   }
 
-  // open input file
-  std::ifstream in(argv[1]);
+  // setup for DB connect
+  sqlite3 *db;
+  char *zErrMsg = 0;
+  int rc;
+  string sql;
+  string data = "Callback Function Called";
+  // open DB file
+  rc = sqlite3_open(argv[1], &db);
+  if ( rc ) {
+    std::cout << "Opening DB failed: " << sqlite3_errmsg(db);
+    exit(0);
+  } else {
+    std::cout << "Opened database successfully" << std::endl;
+  }
 
   // fill data structures
-  vector<string> categories = getCategories(in);
-  vector<string> countries;
-  vector<vector<float>> data;
-  fillData(in, data, countries);
-  in.close();
+  sql = "SELECT * FROM countrydata WHERE isocode IS NOT \"\"";
 
-  generateJson(countries, data, categories);
+  rc = sqlite3_exec(db, sql.c_str(), callback, (void*)data.c_str(), &zErrMsg);
+  if ( rc != SQLITE_OK ) {
+    std::cout << "SQL error: " << zErrMsg << std::endl;
+    sqlite3_free(zErrMsg);
+  } else {
+    std::cout << "Operation Successful" << std::endl;
+  }
 
-  exit(0);
+  sqlite3_close(db);
+  return 0;
 }
 
+static int
+callback (void *data, int argc, char **argv, char **azColName) {
+  //std::cout << static_cast<const char*>(data) << std::endl;
+  for (int i = 0; i < argc; ++i) {
+    std::cout << azColName[i] << " ";
+}
+  std::cout << std::endl;
+
+  for (int i = 0; i < argc; ++i) {
+    std::cout << argv[i] << " ";
+  }
+  std::cout << std::endl;
+  return 0;
+}
+
+
+
+
+
+
+
+/*
 vector<string>& 
 getCategories (std::ifstream& in) {
   // read the first line of the file to determine the categories of the data
@@ -113,3 +154,4 @@ generateJson (vector<string>& countries, vector<vector<float>>& data, vector<str
 
   out.close();
 }
+*/
