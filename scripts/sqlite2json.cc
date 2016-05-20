@@ -3,92 +3,169 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <unordered_map>
 #include <boost/format.hpp>
+#include <sqlite3.h>
 
 using std::string;
 using std::vector;
 
 vector<string>& 
-getCategories (std::ifstream& in);
+getClasses (std::ifstream& in);
 
 void
 fillData (std::ifstream& in, vector<vector<float>>& data, vector<string>& countries);
 
 void
-generateJson (vector<string>& countries, vector<vector<float>>& data, vector<string>& categories);
+generateJson (vector<string>& countries, vector<vector<float>>& data, vector<string>& classes);
+
+void
+checkDBResponse(int rc, char* zErrMsg);
+
+void
+fillClasses(sqlite3 *db, vector<string>& classes);
+
+void
+fillMaxSpeedData(sqlite3 *db);
+
+void
+fillCountryData(sqlite3 *db, vector<string>& countries, vector<vector<float>>& data);
+
+static int
+classCallback (void *data, int argc, char **argv, char **azColName);
+
+static int
+countryDataCallback (void *data, int argc, char **argv, char **azColName);
+
+static int
+maxSpeedCallback (void *data, int argc, char **argv, char **azColName);
 
 int
 main (int argc, char** argv) {
   // If there is no input file print and error and exit
-  if (argc < 1) {
+  if (argc < 2) {
     std::cout << "ERROR: No input file specified." << std::endl;
-    std::cout << "Usage: ./sqlite2json input.txt" << std::endl;
-    exit(1);
+    std::cout << "Usage: ./sqlite2json statistics.sqlite" << std::endl;
+    exit(0);
   }
-
-  // open input file
-  std::ifstream in(argv[1]);
-
-  // fill data structures
-  vector<string> categories = getCategories(in);
+  // data structures
+  vector<string> classes;
   vector<string> countries;
   vector<vector<float>> data;
-  fillData(in, data, countries);
-  in.close();
 
-  generateJson(countries, data, categories);
-
-  exit(0);
-}
-
-vector<string>& 
-getCategories (std::ifstream& in) {
-  // read the first line of the file to determine the categories of the data
-  vector<string> *categories = new vector<string> ();
-  string line;
-  string category;
-  if (std::getline(in, line)) {
-    std::istringstream iss(line);
-    // discard the first header since it is not a label for the data
-    iss >> category;
-    // put the rest of the tokens of the first line into the vector
-    while (iss >> category) {
-      categories->push_back(category);
-    }
-    // If this line is empty we can't continue
-  } else {
-    std::cout << "ERROR: input is empty" << std::endl;
-    exit(1);
+  // open DB file
+  sqlite3 *db;
+  int rc = sqlite3_open(argv[1], &db);
+  if ( rc ) {
+    std::cout << "Opening DB failed: " << sqlite3_errmsg(db);
+    exit(0);
   }
-  categories->push_back("total");
-  return *categories;
+
+  // fill data structures
+  fillClasses(db, classes);
+  fillCountryData(db, countries, data);
+  
+  generateJson(countries, data, classes);
+  
+  sqlite3_close(db);
+  return 0;
 }
 
 void
-fillData (std::ifstream& in, vector<vector<float>>& data, vector<string>& countries) {
-  // read each successive line of the file and parse the data
-  string line;
-  string iso;
-  float val;
-  while (std::getline(in, line)) {
-    std::istringstream iss(line);
-    // store the iso code
-    iss >> iso;
-    countries.push_back(iso);
-    // then iterate through the rest and put into the data vector
-    vector<float> *vec = new vector<float>();
-    float sum = 0;
-    while (iss >> val) {
-      sum += val;
-      vec->push_back(val);
-    }
-    vec->push_back(sum);
-    data.push_back(*vec);
-  }
+checkDBResponse(int rc, char* zErrMsg) {
+  if ( rc != SQLITE_OK ) {
+    std::cout << "SQL error: " << zErrMsg << std::endl;
+    sqlite3_free(zErrMsg);
+    exit(0);
+  } 
 }
 
 void
-generateJson (vector<string>& countries, vector<vector<float>>& data, vector<string>& categories) {
+fillClasses(sqlite3 *db, vector<string>& classes) {
+  
+  string sql = "SELECT * FROM countrydata LIMIT 1";
+
+  char *zErrMsg = 0;
+  int rc = sqlite3_exec(db, sql.c_str(), classCallback, (void*) &classes, &zErrMsg);
+  checkDBResponse(rc, zErrMsg);
+
+}
+
+void
+fillCountryData(sqlite3 *db, vector<string>& countries, vector<vector<float>>& data) {
+  
+  string sql = "SELECT * FROM countrydata WHERE isocode IS NOT \"\"";
+
+  char *zErrMsg = 0;
+  std::pair<vector<string>*, vector<vector<float>>*> dataPair = {&countries, &data};
+  int rc = sqlite3_exec(db, sql.c_str(), countryDataCallback, (void*) &dataPair, &zErrMsg);
+  checkDBResponse(rc, zErrMsg);
+}
+
+void
+fillMaxSpeedData(sqlite3 *db) {
+  
+  string sql = "SELECT isocode,type,maxspeed";
+  sql += " FROM rclassctrydata";
+  sql += " WHERE (type='Motorway' OR type='Trunk' OR type='Primary' OR type='Secondary')";
+  sql += " AND isocode IS NOT \"\"";
+
+  char *zErrMsg = 0;
+  int rc = sqlite3_exec(db, sql.c_str(), maxSpeedCallback, NULL, &zErrMsg);
+  checkDBResponse(rc, zErrMsg);
+}
+
+static int
+classCallback (void *data, int argc, char **argv, char **azColName) {
+  vector<string> *cat = (vector<string>*) data;
+  for (int i = 1; i < argc; ++i) {
+    cat->push_back(azColName[i]);
+  }
+  cat->push_back("total");
+  return 0;
+}
+
+static int
+countryDataCallback (void *dataPair, int argc, char **argv, char **azColName) {
+  std::pair<vector<string>*, vector<vector<float>>*>* p = 
+    (std::pair<vector<string>*, vector<vector<float>>*>*) dataPair;
+  auto* countries = std::get<0>(*p);
+  auto* data = std::get<1>(*p);
+
+  countries->push_back(argv[0]);
+  string line = "";
+  for (int i = 1; i < argc; ++i) {
+    line += argv[i];
+    line += " ";
+  }
+
+  std::istringstream iss(line);
+  float tok;
+  float sum = 0;
+  vector<float> *classData = new vector<float>();
+
+  while (iss >> tok) {
+    classData->push_back(tok);
+    sum += tok;
+  }
+  classData->push_back(sum);
+  data->push_back(*classData);
+
+  return 0;
+}
+
+static int
+maxSpeedCallback (void *data, int argc, char **argv, char **azColName) {
+
+  for (int i = 0; i < argc; ++i) {
+    std::cout << argv[i] << " ";
+  }
+  std::cout << std::endl;
+  return 0;
+}
+
+void
+generateJson (vector<string>& countries, vector<vector<float>>& data, vector<string>& classes) {
 
   std::ofstream out ("road_data.js");
 
@@ -101,9 +178,9 @@ generateJson (vector<string>& countries, vector<vector<float>>& data, vector<str
       str << boost::format("  \"name\" : \"%1%\",\n") % countries[i];
       str << "  \"records\": {\n";
       string fmt2 = "    \"%1%\": %2$.2f";
-      for (size_t j = 0; j < categories.size(); ++j) {
+      for (size_t j = 0; j < classes.size(); ++j) {
         if (j) fmt2 = ",\n    \"%1%\": %2$.2f";
-        str << boost::format(fmt2) % categories[j] % data[i][j];
+        str << boost::format(fmt2) % classes[j] % data[i][j];
       }
       str << "\n  }}";
     }
