@@ -1,4 +1,4 @@
-#include "sqlite2json.h"
+#include "valhalla_build_statistics.h"
 #include <string>
 #include <vector>
 #include <iostream>
@@ -183,24 +183,24 @@ static int maxSpeedCallback (void *data, int argc, char **argv, char **colName) 
  */
 void generateJson (std::vector<std::string>& countries, std::vector<std::vector<float>>& data, std::vector<std::string>& classes) {
 
-  std::ofstream out ("road_data.js");
+  std::ofstream out ("road_data.json");
 
   std::stringstream str;
-    str << "function getAllRoadData(){\nreturn {\n";
-    std::string fmt = "\"%1%\" : {\n";
-    for (size_t i = 0; i < countries.size(); ++i) {
-      if (i) fmt = ",\n\"%1%\" : {\n";
-      str << boost::format(fmt) % countries[i];
-      str << boost::format("  \"name\" : \"%1%\",\n") % countries[i];
-      str << "  \"records\": {\n";
-      std::string fmt2 = "    \"%1%\": %2$.2f";
-      for (size_t j = 0; j < classes.size(); ++j) {
-        if (j) fmt2 = ",\n    \"%1%\": %2$.2f";
-        str << boost::format(fmt2) % classes[j] % data[i][j];
-      }
-      str << "\n  }}";
+  str << "{\n";
+  std::string fmt = "\"%1%\" : {\n";
+  for (size_t i = 0; i < countries.size(); ++i) {
+    if (i) fmt = ",\n\"%1%\" : {\n";
+    str << boost::format(fmt) % countries[i];
+    str << boost::format("  \"name\" : \"%1%\",\n") % countries[i];
+    str << "  \"records\": {\n";
+    std::string fmt2 = "    \"%1%\": %2$.2f";
+    for (size_t j = 0; j < classes.size(); ++j) {
+      if (j) fmt2 = ",\n    \"%1%\": %2$.2f";
+      str << boost::format(fmt2) % classes[j] % data[i][j];
     }
-  str << "\n}}";
+    str << "\n  }}";
+  }
+  str << "\n}";
 
   out << str.str() << std::endl;
 
