@@ -4,7 +4,7 @@
 function prepRoadDataForCharts() {
   window.data = {labels: [], data: []};
   window.sortable = [];
-  var countries = getAllRoadData();
+  var countries = JSON.parse(document.getElementById("jsonResponse").innerHTML);
   Object.keys(countries).forEach(function (iso3) {
     var country = countries[iso3];
 
@@ -15,6 +15,7 @@ function prepRoadDataForCharts() {
   sortable.sort(function (a, b) {
     return (a.country.records.total < b.country.records.total) ? 1 : -1;
   });
+  populateRoadDataChart();
 }
 
 /*
@@ -76,3 +77,18 @@ function populateRoadDataChart() {
     }
   });
 }
+
+function readyAllRoadData() {
+	var xmlhttp = new XMLHttpRequest();
+	var url = "https://raw.githubusercontent.com/Kopkins/Valhalla-Charts/master/data/road_data.json";
+
+	xmlhttp.onreadystatechange = function() {
+		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+			document.getElementById("jsonResponse").innerHTML = xmlhttp.responseText;
+			prepRoadDataForCharts();
+		}
+	};
+
+  xmlhttp.open("GET", url, true);
+  xmlhttp.send();
+};

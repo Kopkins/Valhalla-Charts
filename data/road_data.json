@@ -1,5 +1,4 @@
-function getAllRoadData(){
-return {
+{
 "TN" : {
   "name" : "TN",
   "records": {
@@ -728,4 +727,4 @@ return {
     "unclassified": 3604361.50,
     "total": 136109584.00
   }}
-}}
+}
