@@ -13,7 +13,7 @@ int main (int argc, char** argv) {
   // If there is no input file print and error and exit
   if (argc < 2) {
     std::cout << "ERROR: No input file specified." << std::endl;
-    std::cout << "Usage: ./sqlite2json statistics.sqlite" << std::endl;
+    std::cout << "Usage: " << argv[0] << " statistics.sqlite" << std::endl;
     exit(0);
   }
 
