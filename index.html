@@ -14,6 +14,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/1.2.0/list.min.js"></script>
     <script src="javascript/awesomplete.min.js" async></script>
     <script src="javascript/roadClassCharts.js"></script>
+		<script src="javascript/road_data.jsp"></script>
 
 		<div hidden id="jsonResponse"></div>
 
@@ -34,7 +35,8 @@
 
     <script src="https://mapzen.com/common/styleguide/scripts/mapzen-styleguide.min.js"></script>
     <script>
-        readyAllRoadData();
+        prepRoadDataForCharts();
+				populateRoadDataChart();
     </script>
 </body>
 </html>
