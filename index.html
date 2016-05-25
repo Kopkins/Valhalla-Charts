@@ -14,7 +14,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/1.2.0/list.min.js"></script>
     <script src="javascript/awesomplete.min.js" async></script>
     <script src="javascript/roadClassCharts.js"></script>
-		<script src="javascript/road_data.jsp"></script>
+		<script src="data/road_data.jsp"></script>
 
 		<div hidden id="jsonResponse"></div>
 
@@ -23,8 +23,8 @@
             <h1>Mapzen Valhalla </h1>
             <h2>Road Coverage Types</h2><br/>
 
-            <!--h3>Percentage of Max Speed Tagged High-Class Roads</h3>
-            <canvas id="high-class-road-maxspeed"></canvas -->
+            <h3>Percentage of Max Speed Tagged High-Class Roads</h3>
+            <canvas id="high-class-road-maxspeed"></canvas>
 
             <h3>Road Class per Country</h3> </div> <br/>
             <canvas id="road-class-by-country"></canvas>
@@ -37,6 +37,7 @@
     <script>
         prepRoadDataForCharts();
 				populateRoadDataChart();
+				populateMaxSpeedChart();
     </script>
 </body>
 </html>
