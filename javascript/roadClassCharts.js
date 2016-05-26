@@ -5,14 +5,23 @@ function prepRoadDataForCharts() {
   window.data = {labels: []};
   window.sortable = [];
   var countries = getAllRoadData();
+	var sources = ['Motorway', 'Primary', 'Secondary', 'Trunk'];	
+	var classSources = {
+		'Motorway': 'motorway',
+		'Primary': 'pmary',
+		'Secondary': 'secondary',
+		'Trunk': 'trunk'};
   Object.keys(countries).forEach(function (iso3) {
     var country = countries[iso3];
+
+		country.max_percent = {};
+		sources.forEach(function(source) {
+			country.max_percent[source] = country.maxspeed[source] / country.classinfo[classSources[source]] * 100;
+		});
+
     sortable.push({label: country.name, country: country});
   });
-
-  sortable.sort(function (a, b) {
-    return (a.country.classinfo.total < b.country.classinfo.total) ? 1 : -1;
-  });
+  
 }
 
 /*
@@ -75,13 +84,12 @@ function populateRoadDataChart() {
   });
 }
 
-function populateMaxSpeedChart() {
-	var sources = ['Motorway', 'Primary', 'Secondary', 'Trunk'];
+function populateMaxSpeedChart(type) {
 	var classSources = {
-					'Motorway': 'motorway',
-					'Primary': 'pmary',
-					'Secondary': 'secondary',
-					'Trunk': 'trunk'};
+		'Motorway': 'motorway',
+		'Primary': 'pmary',
+		'Secondary': 'secondary',
+		'Trunk': 'trunk'};
   var sources_colors = {
 		'Motorway':  '#d4645c',
     'Primary':   '#6ea0a4',
@@ -89,22 +97,22 @@ function populateMaxSpeedChart() {
     'Trunk':     '#d3c756'
 
   };
+	
+	sortable.sort(function (a, b) {
+    return b.country.max_percent[type] - a.country.max_percent[type];
+  });
+  data[type] = window.sortable.map(function (item) {
+    return item.country.max_percent[type];
+  });
 	window.data.labels = sortable.map(function (item) {
 		return item.label;
 	});
-	
-	sources.forEach(function (source) {
-    data[source] = window.sortable.map(function (item) {
-      return item.country.maxspeed[source] / item.country.classinfo[classSources[source]] * 25;
-    });
-  });
+
 	var datasets = [];
-  sources.forEach(function (source) {
-    datasets.push({
-      label: source,
-      data: window.data[source],
-      backgroundColor: sources_colors[source]
-    })
+  datasets.push({
+    label: type,
+    data: window.data[type],
+    backgroundColor: sources_colors[type]
   });
 
 	var ctx = document.getElementById("high-class-road-maxspeed").getContext('2d');
@@ -117,13 +125,13 @@ function populateMaxSpeedChart() {
     options: {
       scales: {
         xAxes: [{
-					stacked: true,
+					stacked: false,
           ticks: {
             autoSkip: false
           }
         }],
 				yAxes: [{
-          stacked: true,
+          stacked: false,
           ticks: {
             max: 100
           }
