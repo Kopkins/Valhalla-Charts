@@ -92,6 +92,12 @@ function setupMaxSpeed() {
 
   typeSelect.addEventListener('awesomplete-selectcomplete', function (e) {
     console.log('selection changed to ', e.text.label);
+
+    document.getElementById('high-class-road-maxspeed').remove();
+    var newcanvas = document.createElement('canvas');
+    newcanvas.setAttribute('id', 'high-class-road-maxspeed');
+    document.getElementById('maxspeed-container').appendChild(newcanvas);
+
     populateMaxSpeedChart(e.text.label);
   });
 

@@ -19,12 +19,13 @@
     <div class="container">
         <div>
             <h1>Mapzen Valhalla </h1>
-            <h2>Road Coverage Types</h2><br/>
+            <h2>Road Coverage Types</h2>
+            <br/>
 
             <h3>Percentage of Max Speed Tagged High-Class Roads</h3>
             <br>
             <input class="search opensans" id="typeSelect" size="30" placeholder="Type road type"/>
-            <canvas id="high-class-road-maxspeed"></canvas>
+            <div id="maxspeed-container"><canvas id="high-class-road-maxspeed"></canvas></div>
 
             <h3>Road Class per Country</h3> </div> <br/>
             <canvas id="road-class-by-country"></canvas>
@@ -36,7 +37,7 @@
     <script src="https://mapzen.com/common/styleguide/scripts/mapzen-styleguide.min.js"></script>
     <script>
         prepRoadDataForCharts();
-		populateRoadDataChart();
+    		populateRoadDataChart();
         setupMaxSpeed();
     </script>
 </body>
