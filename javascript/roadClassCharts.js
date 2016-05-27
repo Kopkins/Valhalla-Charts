@@ -11,15 +11,17 @@ function prepRoadDataForCharts() {
 		'Primary': 'pmary',
 		'Secondary': 'secondary',
 		'Trunk': 'trunk'};
-  Object.keys(countries).forEach(function (iso3) {
-    var country = countries[iso3];
-
+  Object.keys(countries).forEach(function (iso) {
+    var country = countries[iso];
 		country.max_percent = {};
+
 		sources.forEach(function(source) {
-			country.max_percent[source] = country.maxspeed[source] / country.classinfo[classSources[source]] * 100;
+			country.max_percent[source] = (country.maxspeed[source] < country.classinfo[classSources[source]])
+			? country.maxspeed[source] / country.classinfo[classSources[source]] * 100
+			: (country.classinfo[classSources[source]] == 0) ? 0 : 100;
 		});
 
-    sortable.push({label: country.name, country: country});
+			sortable.push({label: country.name, country: country});
   });
   
 }
@@ -82,6 +84,20 @@ function populateRoadDataChart() {
       datasets: datasets
     }
   });
+}
+
+function setupMaxSpeed() {
+  var typeSelect = document.getElementById('typeSelect');
+  var types = ['Motorway', 'Primary', 'Secondary', 'Trunk'];
+
+  typeSelect.addEventListener('awesomplete-selectcomplete', function (e) {
+    console.log('selection changed to ', e.text.label);
+    populateMaxSpeedChart(e.text.label);
+  });
+
+  new Awesomplete(typeSelect, {list: types});
+
+  populateMaxSpeedChart('Motorway');
 }
 
 function populateMaxSpeedChart(type) {
