@@ -5,33 +5,33 @@ function prepRoadDataForCharts() {
   window.data = {labels: []};
   window.sortable = [];
   var countries = getAllRoadData();
-	var maxSources = ['Motorway', 'Primary', 'Secondary', 'Trunk'];	
+  var maxSources = ['Motorway', 'Primary', 'Secondary', 'Trunk'];  
   var namedSources = ['Residential', 'Unclassified'];
-	var classSources = {
-		'Motorway': 'motorway',
-		'Primary': 'pmary',
-		'Secondary': 'secondary',
-		'Trunk': 'trunk',
-    'Residential': 'residential',
-    'Unclassified': 'unclassified'};
+  var classSources = {
+  'Motorway': 'motorway',
+  'Primary': 'pmary',
+  'Secondary': 'secondary',
+  'Trunk': 'trunk',
+  'Residential': 'residential',
+  'Unclassified': 'unclassified'};
   Object.keys(countries).forEach(function (iso) {
     var country = countries[iso];
-		country.max_percent = {};
+    country.max_percent = {};
     country.named_percent = {};
 
-		maxSources.forEach(function(source) {
-			country.max_percent[source] = (country.maxspeed[source] < country.classinfo[classSources[source]])
-			? country.maxspeed[source] / country.classinfo[classSources[source]] * 100
-			: (country.classinfo[classSources[source]] == 0) ? 0 : 100;
-		});
+    maxSources.forEach(function(source) {
+      country.max_percent[source] = (country.maxspeed[source] < country.classinfo[classSources[source]])
+      ? country.maxspeed[source] / country.classinfo[classSources[source]] * 100
+      : (country.classinfo[classSources[source]] == 0) ? 0 : 100;
+    });
     
-		namedSources.forEach(function(source) {
-			country.named_percent[source] = (country.named[source] < country.classinfo[classSources[source]])
-			? country.named[source] / country.classinfo[classSources[source]] * 100
-			: (country.classinfo[classSources[source]] == 0) ? 0 : 100;
-		});
+    namedSources.forEach(function(source) {
+      country.named_percent[source] = (country.named[source] < country.classinfo[classSources[source]])
+      ? country.named[source] / country.classinfo[classSources[source]] * 100
+      : (country.classinfo[classSources[source]] == 0) ? 0 : 100;
+    });
 
-			sortable.push({label: country.name, country: country});
+    sortable.push({label: country.name, country: country});
   });
   
 }
@@ -52,8 +52,8 @@ function populateRoadDataChart() {
     'unclassified': '#aebcff'
   };
 
-	window.data.labels = sortable.map(function (item) {
-		return item.label;
+  window.data.labels = sortable.map(function (item) {
+    return item.label;
   });
 
   sources.forEach(function (source) {
@@ -117,37 +117,36 @@ function setupMaxSpeed() {
 }
 
 function populateMaxSpeedChart(type) {
-	var classSources = {
-		'Motorway': 'motorway',
-		'Primary': 'pmary',
-		'Secondary': 'secondary',
-		'Trunk': 'trunk'};
+  var classSources = {
+    'Motorway': 'motorway',
+    'Primary': 'pmary',
+    'Secondary': 'secondary',
+    'Trunk': 'trunk'};
   var sources_colors = {
-		'Motorway':  '#d4645c',
+    'Motorway':  '#d4645c',
     'Primary':   '#6ea0a4',
     'Secondary': '#462272',
     'Trunk':     '#d3c756'
-
   };
-	
-	sortable.sort(function (a, b) {
+  
+  sortable.sort(function (a, b) {
     return b.country.max_percent[type] - a.country.max_percent[type];
   });
   data[type] = window.sortable.map(function (item) {
     return item.country.max_percent[type];
   });
-	window.data.labels = sortable.map(function (item) {
-		return item.label;
-	});
+  window.data.labels = sortable.map(function (item) {
+    return item.label;
+  });
 
-	var datasets = [];
+  var datasets = [];
   datasets.push({
     label: type,
     data: window.data[type],
     backgroundColor: sources_colors[type]
   });
 
-	var ctx = document.getElementById("high-class-road-maxspeed").getContext('2d');
+  var ctx = document.getElementById("high-class-road-maxspeed").getContext('2d');
   new Chart(ctx, {
     type: 'bar',
     data: {
@@ -157,12 +156,12 @@ function populateMaxSpeedChart(type) {
     options: {
       scales: {
         xAxes: [{
-					stacked: false,
+          stacked: false,
           ticks: {
             autoSkip: false
           }
         }],
-				yAxes: [{
+        yAxes: [{
           stacked: false,
           ticks: {
             max: 100
@@ -195,33 +194,33 @@ function setupNamed() {
 
 
 function populateNamedChart(type) {
-	var classSources = {
-		'Unclassified': 'unclassified',
-		'Residential': 'residential'
+  var classSources = {
+    'Unclassified': 'unclassified',
+    'Residential': 'residential'
   };
   var sources_colors = {
-		'Unclassified':  '#55aa5b',
+    'Unclassified':  '#55aa5b',
     'Residential': '#6ab7aa'
   };
-	
-	sortable.sort(function (a, b) {
+  
+  sortable.sort(function (a, b) {
     return b.country.named_percent[type] - a.country.named_percent[type];
   });
   data[type] = window.sortable.map(function (item) {
     return item.country.named_percent[type];
   });
-	window.data.labels = sortable.map(function (item) {
-		return item.label;
-	});
+  window.data.labels = sortable.map(function (item) {
+    return item.label;
+  });
 
-	var datasets = [];
+  var datasets = [];
   datasets.push({
     label: type,
     data: window.data[type],
     backgroundColor: sources_colors[type]
   });
 
-	var ctx = document.getElementById("named-roads").getContext('2d');
+  var ctx = document.getElementById("named-roads").getContext('2d');
   new Chart(ctx, {
     type: 'bar',
     data: {
@@ -231,12 +230,12 @@ function populateNamedChart(type) {
     options: {
       scales: {
         xAxes: [{
-					stacked: false,
+          stacked: false,
           ticks: {
             autoSkip: false
           }
         }],
-				yAxes: [{
+        yAxes: [{
           stacked: false,
           ticks: {
             max: 100
