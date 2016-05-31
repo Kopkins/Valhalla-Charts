@@ -5,19 +5,29 @@ function prepRoadDataForCharts() {
   window.data = {labels: []};
   window.sortable = [];
   var countries = getAllRoadData();
-	var sources = ['Motorway', 'Primary', 'Secondary', 'Trunk'];	
+	var maxSources = ['Motorway', 'Primary', 'Secondary', 'Trunk'];	
+  var namedSources = ['Residential', 'Unclassified'];
 	var classSources = {
 		'Motorway': 'motorway',
 		'Primary': 'pmary',
 		'Secondary': 'secondary',
-		'Trunk': 'trunk'};
+		'Trunk': 'trunk',
+    'Residential': 'residential',
+    'Unclassified': 'unclassified'};
   Object.keys(countries).forEach(function (iso) {
     var country = countries[iso];
 		country.max_percent = {};
+    country.named_percent = {};
 
-		sources.forEach(function(source) {
+		maxSources.forEach(function(source) {
 			country.max_percent[source] = (country.maxspeed[source] < country.classinfo[classSources[source]])
 			? country.maxspeed[source] / country.classinfo[classSources[source]] * 100
+			: (country.classinfo[classSources[source]] == 0) ? 0 : 100;
+		});
+    
+		namedSources.forEach(function(source) {
+			country.named_percent[source] = (country.named[source] < country.classinfo[classSources[source]])
+			? country.named[source] / country.classinfo[classSources[source]] * 100
 			: (country.classinfo[classSources[source]] == 0) ? 0 : 100;
 		});
 
@@ -162,3 +172,78 @@ function populateMaxSpeedChart(type) {
     }
   });
 }
+
+function setupNamed() {
+  var typeSelect = document.getElementById('named_typeSelect');
+  var types = ['Residential', 'Unclassified'];
+
+  typeSelect.addEventListener('awesomplete-selectcomplete', function (e) {
+    console.log('selection changed to ', e.text.label);
+
+    document.getElementById('named-roads').remove();
+    var newcanvas = document.createElement('canvas');
+    newcanvas.setAttribute('id', 'named-roads');
+    document.getElementById('named-container').appendChild(newcanvas);
+
+    populateNamedChart(e.text.label);
+  });
+
+  new Awesomplete(typeSelect, {list: types});
+
+  populateNamedChart('Residential');
+}
+
+
+function populateNamedChart(type) {
+	var classSources = {
+		'Unclassified': 'unclassified',
+		'Residential': 'residential'
+  };
+  var sources_colors = {
+		'Unclassified':  '#55aa5b',
+    'Residential': '#6ab7aa'
+  };
+	
+	sortable.sort(function (a, b) {
+    return b.country.named_percent[type] - a.country.named_percent[type];
+  });
+  data[type] = window.sortable.map(function (item) {
+    return item.country.named_percent[type];
+  });
+	window.data.labels = sortable.map(function (item) {
+		return item.label;
+	});
+
+	var datasets = [];
+  datasets.push({
+    label: type,
+    data: window.data[type],
+    backgroundColor: sources_colors[type]
+  });
+
+	var ctx = document.getElementById("named-roads").getContext('2d');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: data.labels,
+      datasets: datasets
+    },
+    options: {
+      scales: {
+        xAxes: [{
+					stacked: false,
+          ticks: {
+            autoSkip: false
+          }
+        }],
+				yAxes: [{
+          stacked: false,
+          ticks: {
+            max: 100
+          }
+        }]
+      }
+    }
+  });
+}
+
