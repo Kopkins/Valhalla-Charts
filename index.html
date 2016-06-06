@@ -12,7 +12,7 @@
 <body>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.2/Chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/1.2.0/list.min.js"></script>
-    <script src="javascript/awesomplete.min.js"></script>
+    <!--script src="javascript/awesomplete.min.js"></script-->
     <script src="javascript/roadClassCharts.js"></script>
   	<script src="data/road_data.js"></script>
 
@@ -27,11 +27,21 @@
         </div>
         <div>
             <h3>Percentage of Max Speed Tagged High-Class Roads</h3> </br>
-            <input class="search opensans" id="typeSelect" size="30" placeholder="Motorway, Primary, Secondary, or Trunk"/>
+            <!--input class="search opensans" id="typeSelect" size="30"
+                placeholder="Motorway, Primary, Secondary, or Trunk"/-->
+            <select id='typeSelect'>
+              <option value="Motorway">Motorway</option>
+              <option value="Primary">Primary</option>
+              <option value="Secondary">Secondary</option>
+              <option value="Trunk">Trunk</option>
+            </select>
             <div id="maxspeed-container"><canvas id="high-class-road-maxspeed"/></div>
 
             <h3>Percentage of Named Roads</h3> </br>
-            <input class="search opensans" id="named_typeSelect" size="30" placeholder="Residential or Unclassified"/>
+            <select id="named_typeSelect">
+              <option value="Residential">Residential</option>
+              <option value="Unclassified">Unclassified</option>
+            </select>
             <div id="named-container"><canvas id="named-roads"/></div>
 
             <div class='text-center' style="padding-top: 40px; padding-bottom: 40px">
