@@ -24,8 +24,13 @@ function prepRoadDataForCharts() {
       country.GEC = countryCodes[iso2].GEC;
     }
     catch (err) {
-      country.name = iso2;
-      country.GEC = null;
+      if (iso2 === 'FX') {
+        country.name = 'France';
+        country.GEC = 'FR';
+      } else {
+        country.name = iso2;
+        country.GEC = null;
+      }
       console.log("Corresponding name for iso2 code: " + iso2 + " Not Found");
     }
     maxSources.forEach(function(source) {
