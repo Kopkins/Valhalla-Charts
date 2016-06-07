@@ -5,6 +5,7 @@ function prepRoadDataForCharts() {
   window.data = {labels: []};
   window.sortable = [];
   var countries = getAllRoadData();
+  var countryCodes = getCountryCodes();
   var maxSources = ['Motorway', 'Primary', 'Secondary', 'Trunk'];  
   var namedSources = ['Residential', 'Unclassified'];
   var classSources = {
@@ -14,11 +15,19 @@ function prepRoadDataForCharts() {
     'Trunk': 'trunk',
     'Residential': 'residential',
     'Unclassified': 'unclassified'};
-  Object.keys(countries).forEach(function (iso) {
-    var country = countries[iso];
+  Object.keys(countries).forEach(function (iso2) {
+    var country = countries[iso2];
     country.max_percent = {};
     country.named_percent = {};
-
+    try {
+      country.name = countryCodes[iso2].name;
+      country.GEC = countryCodes[iso2].GEC;
+    }
+    catch (err) {
+      country.name = iso2;
+      country.GEC = null;
+      console.log("Corresponding name for iso2 code: " + iso2 + " Not Found");
+    }
     maxSources.forEach(function(source) {
       country.max_percent[source] = (country.maxspeed[source] < country.classinfo[classSources[source]])
       ? country.maxspeed[source] / country.classinfo[classSources[source]] * 100
